@@ -1,4 +1,4 @@
-import os
+import os, re
 from typing import List
 from fastapi import FastAPI, HTTPException, Depends
 import httpx
@@ -15,10 +15,15 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # "*" Разрешаем все источники, рекомендуется только для тестирования
+    allow_origins=[
+        "http://localhost",
+        "http://127.0.0.1",
+        "http://localhost:*",
+        "http://127.0.0.1:*",
+    ],
     allow_credentials=True,
-    allow_methods=["*"],  # "*" Разрешаем все методы
-    allow_headers=["*"],  # "*" Разрешаем все заголовки
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Тестовая функция, т.к. нету регистации соостветсвенно карзине в БД неоткуда взяться
@@ -69,7 +74,7 @@ async def create_product_in_cart(user_id: int, cart_data: schemes.CartData):
             
         # Запрос к калатогу товаров
         async with httpx.AsyncClient() as client:
-            response = await client.get('http://localhost:8001/api/catalog/products')
+            response = await client.get('http://localhost/api/catalog/products')
         
             if response.status_code != 200:
                 raise HTTPException(status_code=response.status_code, detail="Error fetching data")
